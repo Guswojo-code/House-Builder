@@ -17,14 +17,15 @@ char* coord(Vector2 object)
 
 int main(int argc, char *argv[])
 {
-  const int screenWidth = 800;
+  const int screenWidth = 810;
   const int screenHeight = 450;
   Vector2 object = { -100.0f, -100.0f };
-  
-  object.x = 400;
-  object.y = 225;
+  Vector2 grassSet = { 0, 0 };
+  object.x = 0;
+  object.y = 0;
 
   InitWindow(screenWidth, screenHeight, "house");
+  InitAudioDevice();
   SetTargetFPS(60);
 
   float acceleration = 0.000769;
@@ -32,19 +33,20 @@ int main(int argc, char *argv[])
   Vector2 object1;
   int sleepTime;
   Vector2 size;
-  Vector2 block[10];
+  Vector2 block[20];
   int blocknum = 0;
   int i;
-  int roof = 10;
-
-  Image cat = LoadImage("objects/graybrick.png");
-  ImageFlipHorizontal(&cat);
-  ImageResize(&cat, 30, 30);
-
-  //ImageDrawRectangle(&cat, 4, 20, 10, 10, WHITE);
-
-  Texture2D texture = LoadTextureFromImage(cat);
-
+  int roof = 20;
+  int leftBlocks = roof;
+  //Load graybrick image
+  Image graybrick = LoadImage("objects/graybrick.png");
+  ImageFlipHorizontal(&graybrick);
+  ImageResize(&graybrick, 30, 30);
+  Texture2D texture = LoadTextureFromImage(graybrick);
+  //Load grass image
+  Image grass = LoadImage("objects/Grass.png");
+  ImageResize(&grass, 30, 30);
+  Texture2D grassTexture = LoadTextureFromImage(grass);
   while (!WindowShouldClose()){
 
     float deltaTime = GetFrameTime();
@@ -53,7 +55,9 @@ int main(int argc, char *argv[])
     size.y = 30;
     if (IsKeyPressed(KEY_ENTER)) {
       block[blocknum] = object;
-      printf("%d", blocknum);
+      if (leftBlocks != 0){
+            leftBlocks --;
+      }
       if (roof > blocknum){
         blocknum ++;
       }
@@ -71,19 +75,48 @@ int main(int argc, char *argv[])
     ClearBackground(RAYWHITE);
     //DrawRectangleV(object, size, GREEN);
 
-    for (i = 0; i < blocknum; i++) {
+ 
+  
+    for (grassSet.y = 0; grassSet.y < 450;) {
+           DrawTextureV(grassTexture, grassSet, WHITE);
+           grassSet.x += 30;
+
+           if (grassSet.x > 800) {
+              grassSet.y += 30;
+              grassSet.x = 0;
+
+           }
+
+    }   
+
+   for (i = 0; i < blocknum; i++) {
           DrawTextureV(texture, block[i], WHITE);
     }
+
+    //Baundry collision
+   if (object.x < 0) {
+    object.x += 30;
+   }
+   else if (object.x >= screenWidth){
+    object.x -= 30;
+   }
+   if (object.y < 0) {
+    object.y += 30;
+   }
+   else if (object.y >= screenHeight) {
+    object.y -= 30;
+   }
+
     DrawTextureV(texture, object, WHITE);
-    DrawRectangleLines(object.x, object.y, size.x, size.y, BLACK);
     
-    DrawText(TextFormat("Y = %03i", object.y), screenWidth/2, screenHeight/2, 10, BLACK);
+    DrawRectangleLines(object.x, object.y, size.x, size.y, BLACK);
+   
+    DrawText(TextFormat("Blocks left: %3i", leftBlocks), 0, 0, 15, BLACK);
 
     EndDrawing();
   }
-  UnloadImage(cat);
+  UnloadImage(graybrick);
+  UnloadImage(grass);
   CloseWindow();
   return 0;
 }
-
-
