@@ -4,16 +4,6 @@
 #include "string.h"
 
 
-char* coord(Vector2 object)
-{
-
-    char buffer [50];
-    sprintf(buffer, "x=%d y=%d", object.x, object.y);
-
-    return buffer;
-
-}
-
 
 int main(int argc, char *argv[])
 {
@@ -28,55 +18,64 @@ int main(int argc, char *argv[])
   InitAudioDevice();
   SetTargetFPS(60);
 
+  //Audio
+  Sound placeWav = LoadSound("objects/sounds/build.wav");
+  Sound errorWav = LoadSound("objects/sounds/error.wav");
   float acceleration = 0.000769;
   const int speed = 30.0f;
   Vector2 object1;
   int sleepTime;
   Vector2 size;
   Vector2 block[20];
+  Vector2 textPos = {0,0};
   int blocknum = 0;
   int i;
   int roof = 20;
   int leftBlocks = roof;
-  //Load graybrick image
+
+  Font fontTtf = LoadFontEx("objects/PixAntiqua.ttf", 32, 0, 250);    
+
   Image graybrick = LoadImage("objects/graybrick.png");
   ImageFlipHorizontal(&graybrick);
   ImageResize(&graybrick, 30, 30);
   Texture2D texture = LoadTextureFromImage(graybrick);
-  //Load grass image
+  
   Image grass = LoadImage("objects/Grass.png");
   ImageResize(&grass, 30, 30);
   Texture2D grassTexture = LoadTextureFromImage(grass);
+  
+
+
   while (!WindowShouldClose()){
 
     float deltaTime = GetFrameTime();
     sleepTime = deltaTime;
     size.x = 30;
     size.y = 30;
+
     if (IsKeyPressed(KEY_ENTER)) {
       block[blocknum] = object;
       if (leftBlocks != 0){
             leftBlocks --;
+            PlaySound(placeWav);
+      }
+      else {
+            PlaySound(errorWav);
       }
       if (roof > blocknum){
         blocknum ++;
       }
     }
-    if (IsKeyPressed(KEY_RIGHT)) { object.x += speed; }
+    if (IsKeyPressed(KEY_RIGHT) or IsKeyPressed(KEY_D)) { object.x += speed; }
     if (IsKeyPressed(KEY_LEFT)) { object.x -= speed; }
     if (IsKeyPressed(KEY_UP)) { object.y -= speed; }
     if (IsKeyPressed(KEY_DOWN)){ object.y += speed;}
 
-    //acceleration += 0.000125;
-
-    //ball = GetMousePosition();
     BeginDrawing();
 
     ClearBackground(RAYWHITE);
-    //DrawRectangleV(object, size, GREEN);
 
- 
-  
+
     for (grassSet.y = 0; grassSet.y < 450;) {
            DrawTextureV(grassTexture, grassSet, WHITE);
            grassSet.x += 30;
@@ -108,15 +107,23 @@ int main(int argc, char *argv[])
    }
 
     DrawTextureV(texture, object, WHITE);
-    
-    DrawRectangleLines(object.x, object.y, size.x, size.y, BLACK);
-   
-    DrawText(TextFormat("Blocks left: %3i", leftBlocks), 0, 0, 15, BLACK);
 
+    DrawRectangleLines(object.x, object.y, size.x, size.y, BLACK);
+
+    DrawTextEx(fontTtf,TextFormat("Blocks left: %3i", leftBlocks), textPos, (float)fontTtf.baseSize/2, 2, BLACK);
+    //DrawText(i, int posX, int posY, int fontSize, Color color)
     EndDrawing();
   }
+  UnloadSound(errorWav);
+  UnloadSound(placeWav);
+
   UnloadImage(graybrick);
   UnloadImage(grass);
+  
+  UnloadFont(fontTtf);
+
   CloseWindow();
   return 0;
 }
+
+
