@@ -1,8 +1,8 @@
 # House-Builder
-A 2d house builder made in C
+A 2d house builder made in C++
 
 # Remember
-This is still under construction!
+You need to have Raylib installed you can do that here: https://github.com/raysan5/raylib
 
 # Pictures
 
